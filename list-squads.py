@@ -1,37 +1,6 @@
 import sys
 import struct
 
-"""
-  private boolean inSquad(int paramInt1, int paramInt2)
-  {
-    boolean bool = false;
-    if (paramInt2 != 0)
-    {
-      int i;
-      int j;
-      if (paramInt1 < 74)
-      {
-        i = 23;
-        j = 664054 + paramInt1 * i * 2;
-      }
-      else
-      {
-        i = 32;
-        j = 667458 + (paramInt1 - 74) * i * 2;
-      }
-      for (int n = 0; (!bool) && (n < i); n++)
-      {
-        int m = j + n * 2;
-        int k = this.of.toInt(this.of.data[(m + 1)]) << 8 | this.of.toInt(this.of.data[m]);
-        if (k == paramInt2) {
-          bool = true;
-        }
-      }
-    }
-    return bool;
-  }
-"""
-
 def print_player(players, player_id, listed):
     s = "unknown"
     p = players.get(player_id)
