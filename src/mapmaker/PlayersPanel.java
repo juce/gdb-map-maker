@@ -31,6 +31,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 
 class VTeam extends Team {
@@ -82,11 +84,42 @@ public class PlayersPanel extends JPanel
         }
     }
 
+    public void updatePlayerList() {
+        String prefix = nameSearchText.getText().trim();
+        Team t = teamSelectorModel.getElementAt(teamSelector.getSelectedIndex());
+        if (prefix.equals("") || prefix.equals("<Name filter>")) {
+            prefix = null;
+        }
+        if (t.id >= 0) {
+            populatePlayerList(data.getPlayers(t.id, prefix));
+        }
+        else if (t.id == VTeam.EVERYONE) {
+            populatePlayerList(data.getPlayers(prefix));
+        }
+        else if (t.id == VTeam.FREE_AGENTS) {
+            populatePlayerList(data.getFreeAgents(prefix));
+        }
+    }
+
     public PlayersPanel() {
         super();
 
         filtersPanel = new JPanel(new GridLayout(3,1));
-        nameSearchText = new JTextField("Name", 10);
+        nameSearchText = new JTextField("<Name filter>", 10);
+        nameSearchText.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) {
+                update();
+            }
+            public void removeUpdate(DocumentEvent e) {
+                update();
+            }
+            public void insertUpdate(DocumentEvent e) {
+                update();
+            }
+            public void update() {
+                updatePlayerList();
+            }
+        });
 
         teamSelectorModel = new DefaultComboBoxModel<Team>();
         teamSelector = new JComboBox(teamSelectorModel);
@@ -95,17 +128,7 @@ public class PlayersPanel extends JPanel
         teamSelector.addItemListener(new ItemListener() {
             public void itemStateChanged(ItemEvent event) {
                 if (event.getStateChange() == ItemEvent.SELECTED) {
-                    Team t = (Team)event.getItem();
-                    System.out.println(t);
-                    if (t.id >= 0) {
-                        populatePlayerList(data.getPlayers(t.id));
-                    }
-                    else if (t.id == VTeam.EVERYONE) {
-                        populatePlayerList(data.getPlayers());
-                    }
-                    else if (t.id == VTeam.FREE_AGENTS) {
-                        populatePlayerList(data.getFreeAgents());
-                    }
+                    updatePlayerList();
                 }
             }
         });
@@ -128,13 +151,13 @@ public class PlayersPanel extends JPanel
         add(resultsPanel);
 
         of = new OptionFile();
-        of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
-        //of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
+        //of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
+        of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
 
         data = new Data(of);
         data.load();
 
-        populatePlayerList(data.getPlayers());
+        populatePlayerList(data.getPlayers(null));
         populateTeamSelector(data.getTeams());
         populateNationalitySelector();
     }
