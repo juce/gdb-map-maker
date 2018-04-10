@@ -150,27 +150,22 @@ public class Data
         initSquads(of, squads);
     }
 
-    /**
-     * get all players, no filter
-     */
-    public Player[] getPlayers() {
-        List<Player> li = new ArrayList<Player>();
-        for (Map.Entry<Integer,Player> entry : players.entrySet()) {
-            Player p = entry.getValue();
-            if (p.id != 0) {
-                li.add(p);
-            }
+    private boolean playerMatch(Player p, String namePrefix) {
+        if (namePrefix == null || namePrefix.equals("")) {
+            return true;
         }
-        Collections.sort(li, new Comparator<Player>() {
-            @Override
-            public int compare(Player o1, Player o2) {
-                if (o1.id < o2.id) return -1;
-                else if (o1.id > o2.id) return 1;
-                return 0;
-            }
-        });
-        Player[] arr = new Player[li.size()];
-        return li.toArray(arr);
+        if (p.name.toUpperCase().startsWith(namePrefix.toUpperCase())) {
+            return true;
+        }
+        String sn = p.shirtName.toUpperCase();
+        if (sn.toUpperCase().startsWith(namePrefix.toUpperCase())) {
+            return true;
+        }
+        sn = sn.replace(" ","").trim();
+        if (sn.toUpperCase().startsWith(namePrefix.toUpperCase())) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -194,9 +189,34 @@ public class Data
     }
 
     /**
+     * get players
+     */
+    public Player[] getPlayers(String namePrefix) {
+        List<Player> li = new ArrayList<Player>();
+        for (Map.Entry<Integer,Player> entry : players.entrySet()) {
+            Player p = entry.getValue();
+            if (p.id != 0) {
+                if (playerMatch(p, namePrefix)) {
+                    li.add(p);
+                }
+            }
+        }
+        Collections.sort(li, new Comparator<Player>() {
+            @Override
+            public int compare(Player o1, Player o2) {
+                if (o1.id < o2.id) return -1;
+                else if (o1.id > o2.id) return 1;
+                return 0;
+            }
+        });
+        Player[] arr = new Player[li.size()];
+        return li.toArray(arr);
+    }
+
+    /**
      * get players for specific team
      */
-    public Player[] getPlayers(int teamId) {
+    public Player[] getPlayers(int teamId, String namePrefix) {
         Squad squad = squads.get(teamId);
         if (squad == null) {
             return new Player[0];
@@ -206,7 +226,9 @@ public class Data
         for (int i=0; i<squad.players.length; i++) {
             Player p = this.players.get(squad.players[i]);
             if (p != null && p.id != 0) {
-                li.add(p);
+                if (playerMatch(p, namePrefix)) {
+                    li.add(p);
+                }
             }
         }
         Player[] arr = new Player[li.size()];
@@ -216,12 +238,14 @@ public class Data
     /**
      * get free agents
      */
-    public Player[] getFreeAgents() {
+    public Player[] getFreeAgents(String namePrefix) {
         List<Player> li = new ArrayList<Player>();
         for (Map.Entry<Integer,Player> entry : freeAgents.entrySet()) {
             Player p = entry.getValue();
             if (p.id != 0) {
-                li.add(p);
+                if (playerMatch(p, namePrefix)) {
+                    li.add(p);
+                }
             }
         }
         Collections.sort(li, new Comparator<Player>() {
