@@ -13,6 +13,9 @@ public class Player
     }
 
     public String toString() {
+        if (this.id >= 32768 && this.name.equals("")) {
+            return "" + id + ": <empty slot>";
+        }
         return "" + id + ": " + name + " (" + shirtName + ")";
     }
 }
