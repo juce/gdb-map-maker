@@ -16,6 +16,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -51,13 +52,16 @@ class VTeam extends Team {
 public class PlayersPanel extends JPanel
 {
     JPanel filtersPanel;
-    JPanel resultsPanel;
     JPanel playerPanel;
 
     JTextField nameSearchText;
     JComboBox teamSelector;
     JComboBox nationalitySelector;
     JList playerList;
+
+    JLabel playerId;
+    JLabel playerName;
+    JLabel playerShirtName;
 
     DefaultListModel<Player> playerListModel;
     DefaultComboBoxModel<Team> teamSelectorModel;
@@ -87,7 +91,7 @@ public class PlayersPanel extends JPanel
     public void updatePlayerList() {
         String prefix = nameSearchText.getText().trim();
         Team t = teamSelectorModel.getElementAt(teamSelector.getSelectedIndex());
-        if (prefix.equals("") || prefix.equals("<Name filter>")) {
+        if (prefix.equals("")) {
             prefix = null;
         }
         if (t.id >= 0) {
@@ -104,8 +108,10 @@ public class PlayersPanel extends JPanel
     public PlayersPanel() {
         super();
 
-        filtersPanel = new JPanel(new GridLayout(3,1));
-        nameSearchText = new JTextField("<Name filter>", 10);
+        filtersPanel = new JPanel();
+        filtersPanel.setLayout(new BoxLayout(filtersPanel,BoxLayout.Y_AXIS));
+        JPanel searchPanel = new JPanel();
+        nameSearchText = new JTextField("", 15);
         nameSearchText.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
                 update();
@@ -120,9 +126,12 @@ public class PlayersPanel extends JPanel
                 updatePlayerList();
             }
         });
+        searchPanel.add(new JLabel("Search"));
+        searchPanel.add(nameSearchText);
 
         teamSelectorModel = new DefaultComboBoxModel<Team>();
         teamSelector = new JComboBox(teamSelectorModel);
+        teamSelector.setMaximumRowCount(20);
         teamSelectorModel.addElement(new VTeam(VTeam.EVERYONE, "<Any player>"));
         teamSelectorModel.addElement(new VTeam(VTeam.FREE_AGENTS, "<Free agents>"));
         teamSelector.addItemListener(new ItemListener() {
@@ -138,21 +147,43 @@ public class PlayersPanel extends JPanel
         nationalitySelector.addItem("<Any nationality>");
         nationalitySelector.setEnabled(false);
 
-        filtersPanel.add(nameSearchText);
+        filtersPanel.add(searchPanel);
         filtersPanel.add(teamSelector);
-        filtersPanel.add(nationalitySelector);
+        //filtersPanel.add(nationalitySelector);
+
+        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         add(filtersPanel);
 
-        resultsPanel = new JPanel();
-        playerListModel = new DefaultListModel<Player>();
-        playerList = new JList(playerListModel);
+        //playerListModel = new DefaultListModel<Player>();
+        //playerList = new JList(playerListModel);
+        playerList = new JList();
         playerList.setVisibleRowCount(32);
-        resultsPanel.add(new JScrollPane(playerList));
-        add(resultsPanel);
+        playerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        playerList.addListSelectionListener(new ListSelectionListener() {
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting())
+                {
+                    if (playerList.isSelectionEmpty())
+                    {
+                        playerId.setText("Player id: ");
+                        playerName.setText("Player name: ");
+                        playerShirtName.setText("Player shirt name: ");
+                    }
+                    else
+                    {
+                        Player p = (Player)playerList.getSelectedValue();
+                        playerId.setText("Player id: " + p.id);
+                        playerName.setText("Player name: " + p.name);
+                        playerShirtName.setText("Player shirt name: " + p.shirtName);
+                    }
+                }
+            }
+        });
+        filtersPanel.add(new JScrollPane(playerList));
 
         of = new OptionFile();
-        //of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
-        of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
+        of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
+        //of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
 
         data = new Data(of);
         data.load();
@@ -160,6 +191,17 @@ public class PlayersPanel extends JPanel
         populatePlayerList(data.getPlayers(null));
         populateTeamSelector(data.getTeams());
         populateNationalitySelector();
+
+        playerPanel = new JPanel();
+        playerPanel.setLayout(new BoxLayout(playerPanel, BoxLayout.Y_AXIS));
+        playerPanel.add(new JLabel("Player info"));
+        playerId = new JLabel("Player id: ");
+        playerName = new JLabel("Player name: ");
+        playerShirtName = new JLabel("Player shirt name: ");
+        playerPanel.add(playerId);
+        playerPanel.add(playerName);
+        playerPanel.add(playerShirtName);
+        add(playerPanel);
     }
 }
  

@@ -59,9 +59,8 @@ public class MapMaker extends JFrame
         JMenu menu = new JMenu("File");
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent paramAnonymousActionEvent)
-            {
-            System.exit(0);
+            public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
+                System.exit(0);
             }
         });
         menu.add(exitItem);
