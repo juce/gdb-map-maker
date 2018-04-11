@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Collections;
 import java.util.Comparator;
 import java.io.UnsupportedEncodingException;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 public class Data
 {
@@ -15,6 +17,8 @@ public class Data
     Map<Integer,Team> teams;
     Map<Integer,Squad> squads;
     Map<Integer,Player> freeAgents;
+
+    final int NUM_SQUADS = 217;
 
     public Data(OptionFile of) {
         this.of = of;
@@ -81,7 +85,56 @@ public class Data
                 abbr = bytesUtf8ToString(of.data, s + i*0x8c + 0x4d, 3);
             }
 
-            map.put(i, new Team(i+64, abbr, name, true));
+            map.put(i+64, new Team(i+64, abbr, name, true));
+        }
+    }
+
+    private void initOtherTeams(Map<Integer,Team> map) {
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new FileReader("national-teams.csv"));
+            String line = null;
+            while ((line = br.readLine()) != null) {
+                line = line.trim();
+                String[] tokens = line.split(",");
+                if (tokens.length == 3) {
+                    try {
+                        int id = Integer.parseInt(tokens[0].trim());
+                        String abbr = tokens[1].trim();
+                        String name = tokens[2].trim().replace("\"","");
+                        Team team = new Team(id, abbr, name, false);
+                        map.put(id, team);
+                    }
+                    catch (Exception e) {
+                        // skip non-complaint lines
+                    }
+                }
+            }
+            br.close();
+        }
+        catch (Exception e) {
+        }
+
+        /* backfill with generic names, if needed */
+        for (int i=0; i<64; i++) {
+            if (map.get(i) == null) {
+                String name = String.format("Team %d", i);
+                String abbr = "NAT";
+                map.put(i, new Team(i, abbr, name, false));
+            }
+        }
+        int[] ids = {202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216};
+        String[] abbrs = {"ML","SH1","SH2","SH3","SH4","JP1","JP2","EN1","EN2","EN3","EN4","EN5","EN6","EN7","EN8"};
+        String[] names = {
+            "<ML Default>", "<Shop 1>", "<Shop 2>", "<Shop 3>", "<Shop 4>",
+            "<Japan 1>", "<Japan 2>",
+            "<Edited> National 1", "<Edited> National 2", "<Edited> National 3", "<Edited> National 4",
+            "<Edited> National 5", "<Edited> National 6", "<Edited> National 7", "<Edited> National 8",
+        };
+        for (int i=0; i<ids.length; i++) {
+            if (map.get(ids[i]) == null) {
+                map.put(ids[i], new Team(ids[i], abbrs[i], names[i], false));
+            }
         }
     }
 
@@ -104,41 +157,55 @@ public class Data
         for (int i=0; i<cn; i++) {
             String name = bytesUtf16ToString(of.data, cs + i*0x7c, 0x20);
             String shirtName = bytesUtf8ToString(of.data, cs + i*0x7c + 0x20, 0x10);
-            map.put(n+i, new Player(i+32768, name, shirtName));
-            freeAgents.put(n+i, new Player(i+32768, name, shirtName));
+            map.put(i+32768, new Player(i+32768, name, shirtName));
+            freeAgents.put(i+32768, new Player(i+32768, name, shirtName));
         }
     }
 
     private void initTeams(OptionFile of, Map<Integer,Team> map) {
         initClubTeams(of, map);
+        initOtherTeams(map);
     }
 
     private void initSquads(OptionFile of, Map<Integer,Squad> map) {
         int nat_off = fourBytesToInt(of.data, 0x164);
         int club_off = fourBytesToInt(of.data, 0x168);
 
-        final int NUM_SQUADS = 217;
-
         int num = 23;
-        for (int i=0; i<64; i++) {
+        for (int i=0; i<74; i++) {
             int team_off = nat_off + i*2*num;
-            Squad squad = new Squad(i, num);
+            int k = (i<64) ? i : i+NUM_SQUADS-74;
+            Squad squad = new Squad(k, num);
+            Team team = teams.get(k);
             for (int j=0; j<num; j++) {
                 int player_id = twoBytesToInt(of.data, team_off + j*2);
                 squad.players[j] = player_id;
                 freeAgents.remove(player_id);
+
+                // plays for national team
+                Player p = players.get(player_id);
+                if (p != null && team != null) {
+                    p.teams.add(team);
+                }
             }
-            map.put(i, squad);
+            map.put(k, squad);
         }
 
         num = 32;
         for (int i=0; i<NUM_SQUADS-74; i++) {
             int team_off = club_off + i*2*num;
             Squad squad = new Squad(i, num);
+            Team team = teams.get(i+64);
             for (int j=0; j<num; j++) {
                 int player_id = twoBytesToInt(of.data, team_off + j*2);
                 squad.players[j] = player_id;
                 freeAgents.remove(player_id);
+
+                // plays for club
+                Player p = players.get(player_id);
+                if (p != null && team != null) {
+                    p.teams.add(team);
+                }
             }
             map.put(i+64, squad);
         }
@@ -219,6 +286,7 @@ public class Data
     public Player[] getPlayers(int teamId, String namePrefix) {
         Squad squad = squads.get(teamId);
         if (squad == null) {
+            System.out.println("squad is null for teamId: " + teamId);
             return new Player[0];
         }
         List<Player> li = new ArrayList<Player>();
