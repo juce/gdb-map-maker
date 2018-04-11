@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.ListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultListModel;
@@ -62,6 +63,7 @@ public class PlayersPanel extends JPanel
     JLabel playerId;
     JLabel playerName;
     JLabel playerShirtName;
+    JPanel playerTeams;
 
     DefaultListModel<Player> playerListModel;
     DefaultComboBoxModel<Team> teamSelectorModel;
@@ -168,6 +170,7 @@ public class PlayersPanel extends JPanel
                         playerId.setText("Player id: ");
                         playerName.setText("Player name: ");
                         playerShirtName.setText("Player shirt name: ");
+                        playerTeams.removeAll();
                     }
                     else
                     {
@@ -175,6 +178,10 @@ public class PlayersPanel extends JPanel
                         playerId.setText("Player id: " + p.id);
                         playerName.setText("Player name: " + p.name);
                         playerShirtName.setText("Player shirt name: " + p.shirtName);
+                        playerTeams.removeAll();
+                        for (Team team : p.teams) {
+                            playerTeams.add(new JLabel(team.toString()));
+                        }
                     }
                 }
             }
@@ -182,8 +189,9 @@ public class PlayersPanel extends JPanel
         filtersPanel.add(new JScrollPane(playerList));
 
         of = new OptionFile();
-        of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
-        //of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
+        //of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
+        of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
+        //of.readXPS(new File("KONAMI-WIN32PES5OPT"));
 
         data = new Data(of);
         data.load();
@@ -194,13 +202,16 @@ public class PlayersPanel extends JPanel
 
         playerPanel = new JPanel();
         playerPanel.setLayout(new BoxLayout(playerPanel, BoxLayout.Y_AXIS));
-        playerPanel.add(new JLabel("Player info"));
         playerId = new JLabel("Player id: ");
         playerName = new JLabel("Player name: ");
         playerShirtName = new JLabel("Player shirt name: ");
+        playerTeams = new JPanel();
+        playerTeams.setLayout(new BoxLayout(playerTeams, BoxLayout.Y_AXIS));
         playerPanel.add(playerId);
         playerPanel.add(playerName);
         playerPanel.add(playerShirtName);
+        playerPanel.add(new JLabel("Player teams: "));
+        playerPanel.add(playerTeams);
         add(playerPanel);
     }
 }

@@ -1,3 +1,3 @@
 #!/bin/bash -uxe
-make build
+make clean build
 java -cp dist mapmaker.MapMaker
