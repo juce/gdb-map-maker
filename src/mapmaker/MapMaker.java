@@ -52,7 +52,7 @@ class MapMakerStartup extends JFrame
         loadingPane.setLayout(new BoxLayout(loadingPane, BoxLayout.Y_AXIS));
         pb = new JProgressBar();
         pb.setValue(0);
-        URL localURL = getClass().getResource("data/icon.png");
+        URL localURL = getClass().getResource("data/icon-large.png");
         if (localURL != null) {
             ImageIcon localImage = new ImageIcon(localURL);
             loadingPane.add(new JLabel(localImage));
