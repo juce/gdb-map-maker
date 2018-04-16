@@ -107,7 +107,7 @@ public class PlayersPanel extends JPanel
         }
     }
 
-    public PlayersPanel() {
+    public PlayersPanel(OptionFile of) {
         super();
 
         filtersPanel = new JPanel();
@@ -188,12 +188,17 @@ public class PlayersPanel extends JPanel
         });
         filtersPanel.add(new JScrollPane(playerList));
 
-        of = new OptionFile();
-        of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
-        //of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
-        //of.readXPS(new File("KONAMI-WIN32PES5OPT"));
+        if (of != null) {
+            this.of = of;
+        }
+        else {
+            this.of = new OptionFile();
+            this.of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
+            //of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
+            //of.readXPS(new File("KONAMI-WIN32PES5OPT"));
+        }
 
-        data = new Data(of);
+        data = new Data(this.of);
         data.load();
 
         populatePlayerList(data.getPlayers(null));
