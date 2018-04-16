@@ -12,3 +12,7 @@ jar:
 	rm -f GDB_MapMaker.jar
 	cd dist && jar cvfm ../GDB_MapMaker.jar ../src/MANIFEST mapmaker
 
+mapfile=map.txt
+test:
+	javac -d dist src/mapmaker/GDBMap.java
+	java -cp dist mapmaker.GDBMap $(mapfile)
