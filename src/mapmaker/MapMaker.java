@@ -34,18 +34,20 @@ import java.util.Date;
 
 class MapMakerStartup extends JFrame
 {
-    OptionFile of;
     JProgressBar pb;
     JPanel loadingPane;
     List<Listener> listeners;
+
+    String optionFilename;
+    String gdbDirname;
     boolean doneLoading;
 
     public interface Listener {
-        public void loaded(OptionFile of);
+        public void startup(String optionFilename, String gdbDirname);
     }
 
     public MapMakerStartup() {
-        super("GDB Map Maker Loading ...");
+        super("GDB Map Maker");
         listeners = new ArrayList<Listener>();
         setIcon();
         loadingPane = new JPanel();
@@ -76,22 +78,27 @@ class MapMakerStartup extends JFrame
         });
         t1.start();
 
+        // load file locations
+        loadFileNames();
+
+        // kick-off initialization
         Thread t = new Thread(new Runnable() {
             public void run() {
                 log("starting");
-                loadOptionFile("m17/KONAMI-WIN32WE9KOPT");
-                log("option file loaded");
-                // notify listeners
                 for (Listener li : listeners) {
-                    li.loaded(of);
+                    li.startup(optionFilename, gdbDirname);
                 }
-                log("listeners done");
+                log("startup done");
                 setVisible(false);
                 doneLoading = true;
             }
         });
         t.start();
+    }
 
+    public void loadFileNames() {
+        optionFilename = "m17/KONAMI-WIN32WE9KOPT";
+        gdbDirname = "";
     }
 
     public void log(String message) {
@@ -107,16 +114,7 @@ class MapMakerStartup extends JFrame
         }
     }
 
-    public void loadOptionFile(String filename) {
-        of = new OptionFile();
-        of.readXPS(new File(filename));
-    }
-
-    public OptionFile getOptionFile() {
-        return of;
-    }
-
-    public void onStartupDone(Listener listener) {
+    public void onStartup(Listener listener) {
         listeners.add(listener);
     }
 }
@@ -128,12 +126,12 @@ public class MapMaker extends JFrame
     StadiumsPanel stadiumsPanel;
     BallsPanel ballsPanel;
 
-    public MapMaker(OptionFile of) {
+    public MapMaker(String optionFilename, String gdbDirname) {
         super("GDB Map Maker");
         setIcon();
         buildMenu();
 
-        playersPanel = new PlayersPanel(of);
+        playersPanel = new PlayersPanel(optionFilename, gdbDirname);
         stadiumsPanel = new StadiumsPanel();
         ballsPanel = new BallsPanel();
 
@@ -170,9 +168,9 @@ public class MapMaker extends JFrame
     }
           
     public static void main(String args[]) {
-        new MapMakerStartup().onStartupDone(new MapMakerStartup.Listener() {
-            public void loaded(OptionFile of) {
-                new MapMaker(of);
+        new MapMakerStartup().onStartup(new MapMakerStartup.Listener() {
+            public void startup(String optionFilename, String gdbDirname) {
+                new MapMaker(optionFilename, gdbDirname);
             }
         });
     }

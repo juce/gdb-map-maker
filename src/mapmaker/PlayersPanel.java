@@ -71,6 +71,7 @@ public class PlayersPanel extends JPanel
 
     OptionFile of;
     Data data;
+    String gdbDirname;
 
     private void populatePlayerList(Player[] players) {
         playerList.setListData(players);
@@ -107,7 +108,7 @@ public class PlayersPanel extends JPanel
         }
     }
 
-    public PlayersPanel(OptionFile of) {
+    public PlayersPanel(String optionFilename, String gdbDirname) {
         super();
 
         filtersPanel = new JPanel();
@@ -188,18 +189,12 @@ public class PlayersPanel extends JPanel
         });
         filtersPanel.add(new JScrollPane(playerList));
 
-        if (of != null) {
-            this.of = of;
-        }
-        else {
-            this.of = new OptionFile();
-            this.of.readXPS(new File("m17/KONAMI-WIN32WE9KOPT"));
-            //of.readXPS(new File("KONAMI-WIN32WE9KOPT"));
-            //of.readXPS(new File("KONAMI-WIN32PES5OPT"));
-        }
-
-        data = new Data(this.of);
+        of = new OptionFile();
+        of.readXPS(new File(optionFilename));
+        data = new Data(of);
         data.load();
+
+        this.gdbDirname = gdbDirname;
 
         populatePlayerList(data.getPlayers(null));
         populateTeamSelector(data.getTeams());
