@@ -10,12 +10,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.net.URL;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileSystemView;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -34,6 +41,7 @@ import java.util.Date;
 
 class MapMakerStartup extends JFrame
 {
+    JLabel waitText;
     JProgressBar pb;
     JPanel loadingPane;
     List<Listener> listeners;
@@ -41,6 +49,8 @@ class MapMakerStartup extends JFrame
     String optionFilename;
     String gdbDirname;
     boolean doneLoading;
+
+    public static final String INI_FILE = "mapmaker.ini";
 
     public interface Listener {
         public void startup(String optionFilename, String gdbDirname);
@@ -52,6 +62,7 @@ class MapMakerStartup extends JFrame
         setIcon();
         loadingPane = new JPanel();
         loadingPane.setLayout(new BoxLayout(loadingPane, BoxLayout.Y_AXIS));
+        waitText = new JLabel("Loading, please wait ...");
         pb = new JProgressBar();
         pb.setValue(0);
         URL localURL = getClass().getResource("data/icon-large.png");
@@ -59,13 +70,6 @@ class MapMakerStartup extends JFrame
             ImageIcon localImage = new ImageIcon(localURL);
             loadingPane.add(new JLabel(localImage));
         }
-        loadingPane.add(new JLabel("Loading, please wait ..."));
-        loadingPane.add(pb);
-        getContentPane().add(loadingPane);
-        pack();
-        setVisible(true);
-        doneLoading = false;
-
         // progress bar updater
         Thread t1 = new Thread(new Runnable() {
             public void run() {
@@ -80,8 +84,75 @@ class MapMakerStartup extends JFrame
 
         // load file locations
         loadFileNames();
+        boolean noButtons = true;
 
+        if (optionFilename == null) {
+            waitText.setVisible(false);
+            pb.setVisible(false);
+            noButtons = false;
+
+            JButton b = new JButton("Choose option file");
+            b.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent event) {
+                    JFileChooser jfc = new JFileChooser(); //FileSystemView.getFileSystemView().getDefaultDirectory());
+                    jfc.setDialogTitle("Choose OPTION file");
+                    int returnValue = jfc.showOpenDialog(null);
+                    if (returnValue == JFileChooser.APPROVE_OPTION) {
+                        File selectedFile = jfc.getSelectedFile();
+                        optionFilename = selectedFile.getAbsolutePath();
+                        loadingPane.remove(b);
+                        pack();
+                        if (optionFilename != null && gdbDirname != null) {
+                            triggerStartup();
+                        }
+                    }
+                }
+            });
+            loadingPane.add(b);
+        }
+        if (gdbDirname == null) {
+            waitText.setVisible(false);
+            pb.setVisible(false);
+            noButtons = false;
+
+            JButton b = new JButton("Choose GDB directory");
+            b.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent event) {
+                    JFileChooser jfc = new JFileChooser(); //FileSystemView.getFileSystemView().getDefaultDirectory());
+                    jfc.setDialogTitle("Choose GDB directory");
+                    int returnValue = jfc.showOpenDialog(null);
+                    if (returnValue == JFileChooser.APPROVE_OPTION) {
+                        File selectedFile = jfc.getSelectedFile();
+                        gdbDirname = selectedFile.getAbsolutePath();
+                        loadingPane.remove(b);
+                        pack();
+                        if (optionFilename != null && gdbDirname != null) {
+                            triggerStartup();
+                        }
+                    }
+                }
+            });
+            loadingPane.add(b);
+        }
+
+        loadingPane.add(waitText);
+        loadingPane.add(pb);
+        getContentPane().add(loadingPane);
+        pack();
+        setVisible(true);
+        doneLoading = false;
+
+        if (noButtons) {
+            triggerStartup();
+        }
+    }
+
+    public void triggerStartup() {
         // kick-off initialization
+        waitText.setVisible(true);
+        pb.setVisible(true);
+        pack();
+
         Thread t = new Thread(new Runnable() {
             public void run() {
                 log("starting");
@@ -94,11 +165,42 @@ class MapMakerStartup extends JFrame
             }
         });
         t.start();
+        saveFileNames();
     }
 
     public void loadFileNames() {
-        optionFilename = "m17/KONAMI-WIN32WE9KOPT";
-        gdbDirname = "";
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(INI_FILE), "utf-8"));
+            optionFilename = br.readLine();
+            if (optionFilename != null) {
+                optionFilename = optionFilename.trim();
+            }
+            gdbDirname = br.readLine();
+            if (gdbDirname != null) {
+                gdbDirname = gdbDirname.trim();
+            }
+            br.close();
+        }
+        catch (FileNotFoundException e1) {
+            System.out.println("Warning: " + INI_FILE + " was not found");
+        }
+        catch (IOException e2) {
+            System.out.println("Problem: " + e2);
+        }
+        System.out.println("Using optionFilename: " + optionFilename);
+        System.out.println("Using gdbDirname: " + gdbDirname);
+    }
+
+    public void saveFileNames() {
+        try {
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(INI_FILE), "utf-8"));
+            bw.write(optionFilename + "\r\n");
+            bw.write(gdbDirname + "\r\n");
+            bw.close();
+        }
+        catch (IOException e1) {
+            System.out.println("Warning: cannot save " + INI_FILE);
+        }
     }
 
     public void log(String message) {
@@ -170,7 +272,13 @@ public class MapMaker extends JFrame
     public static void main(String args[]) {
         new MapMakerStartup().onStartup(new MapMakerStartup.Listener() {
             public void startup(String optionFilename, String gdbDirname) {
-                new MapMaker(optionFilename, gdbDirname);
+                try {
+                    new MapMaker(optionFilename, gdbDirname);
+                }
+                catch (Exception e) {
+                    System.out.println("FATAL problem: " + e);
+                    System.exit(3);
+                }
             }
         });
     }
