@@ -1,3 +1,4 @@
 *.class
 *.jar
 dist/*
+mapmaker.ini
