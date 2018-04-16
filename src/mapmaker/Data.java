@@ -128,8 +128,8 @@ public class Data
         String[] names = {
             "<ML Default>", "<Shop 1>", "<Shop 2>", "<Shop 3>", "<Shop 4>",
             "<Japan 1>", "<Japan 2>",
-            "<Edited> National 1", "<Edited> National 2", "<Edited> National 3", "<Edited> National 4",
-            "<Edited> National 5", "<Edited> National 6", "<Edited> National 7", "<Edited> National 8",
+            "<Edited 1>", "<Edited 2>", "<Edited 3>", "<Edited 4>",
+            "<Edited 5>", "<Edited 6>", "<Edited 7>", "<Edited 8>",
         };
         for (int i=0; i<ids.length; i++) {
             if (map.get(ids[i]) == null) {
