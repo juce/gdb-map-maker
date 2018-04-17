@@ -92,7 +92,7 @@ public class Data
     private void initOtherTeams(Map<Integer,Team> map) {
         BufferedReader br = null;
         try {
-            br = new BufferedReader(new FileReader("national-teams.csv"));
+            br = new BufferedReader(new FileReader("team-names.csv"));
             String line = null;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
