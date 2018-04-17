@@ -35,6 +35,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import java.util.Date;
 
 
 class VTeam extends Team {
@@ -189,8 +190,10 @@ public class PlayersPanel extends JPanel
         });
         filtersPanel.add(new JScrollPane(playerList));
 
+        System.out.println(""+(new Date())+": loading option file");
         of = new OptionFile();
         of.readXPS(new File(optionFilename));
+        System.out.println(""+(new Date())+": option file loaded");
         data = new Data(of);
         data.load();
 
