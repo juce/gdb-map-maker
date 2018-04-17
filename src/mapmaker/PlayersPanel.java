@@ -66,6 +66,10 @@ public class PlayersPanel extends JPanel
     JLabel playerShirtName;
     JPanel playerTeams;
 
+    FileChoicePanel faceBin;
+    FileChoicePanel hairBin;
+    FileChoicePanel bootsFile;
+
     DefaultListModel<Player> playerListModel;
     DefaultComboBoxModel<Team> teamSelectorModel;
     DefaultComboBoxModel<Nationality> nationalitySelectorModel;
@@ -73,6 +77,10 @@ public class PlayersPanel extends JPanel
     OptionFile of;
     Data data;
     String gdbDirname;
+
+    GDBMap facesMap;
+    GDBMap hairMap;
+    GDBMap bootsMap;
 
     private void populatePlayerList(Player[] players) {
         playerList.setListData(players);
@@ -106,6 +114,15 @@ public class PlayersPanel extends JPanel
         }
         else if (t.id == VTeam.FREE_AGENTS) {
             populatePlayerList(data.getFreeAgents(prefix));
+        }
+    }
+
+    private void loadMap(GDBMap map, String filename) {
+        try {
+            map.load(filename);
+        }
+        catch (Exception e) {
+            System.out.println("Warning: failed to load GDB map: " + filename);
         }
     }
 
@@ -173,6 +190,9 @@ public class PlayersPanel extends JPanel
                         playerName.setText("Player name: ");
                         playerShirtName.setText("Player shirt name: ");
                         playerTeams.removeAll();
+                        faceBin.clear();
+                        hairBin.clear();
+                        bootsFile.clear();
                     }
                     else
                     {
@@ -184,12 +204,24 @@ public class PlayersPanel extends JPanel
                         for (Team team : p.teams) {
                             playerTeams.add(new JLabel(team.toString()));
                         }
+
+                        String face = facesMap.getFirst(p.id);
+                        face = (face == null) ? "None" : face;
+                        String hair = hairMap.getFirst(p.id);
+                        hair = (hair == null) ? "None" : hair;
+                        String boots = bootsMap.getFirst(p.id);
+                        boots = (boots == null) ? "None" : boots;
+
+                        faceBin.setChoice(face);
+                        hairBin.setChoice(hair);
+                        bootsFile.setChoice(boots);
                     }
                 }
             }
         });
         filtersPanel.add(new JScrollPane(playerList));
 
+        // load option file
         System.out.println(""+(new Date())+": loading option file");
         of = new OptionFile();
         of.readXPS(new File(optionFilename));
@@ -197,7 +229,18 @@ public class PlayersPanel extends JPanel
         data = new Data(of);
         data.load();
 
+        // load GDB maps
         this.gdbDirname = gdbDirname;
+        facesMap = new GDBMap();
+        loadMap(facesMap, this.gdbDirname + "/faces/map.txt");
+        hairMap = new GDBMap();
+        loadMap(hairMap, this.gdbDirname + "/hair/map.txt");
+        bootsMap = new GDBMap();
+        loadMap(bootsMap, this.gdbDirname + "/boots/map.txt");
+
+        //facesMap.print();
+        //hairMap.print();
+        //bootsMap.print();
 
         populatePlayerList(data.getPlayers(null));
         populateTeamSelector(data.getTeams());
@@ -210,11 +253,60 @@ public class PlayersPanel extends JPanel
         playerShirtName = new JLabel("Player shirt name: ");
         playerTeams = new JPanel();
         playerTeams.setLayout(new BoxLayout(playerTeams, BoxLayout.Y_AXIS));
+
+        faceBin = new FileChoicePanel(this.gdbDirname + "/faces", "Face", "");
+        faceBin.addListener(new FileChoicePanel.Listener() {
+            public void valueChanged(String value) {
+                Player p = (Player)playerList.getSelectedValue();
+                GDBMap.Entry e = facesMap.get(p.id);
+                if (e != null) {
+                    e.values[0] = value;
+                }
+                else {
+                    String[] values = { value };
+                    facesMap.put(p.id, new GDBMap.Entry(values, "# "+p.name));
+                }
+            }
+        });
+
+        hairBin = new FileChoicePanel(this.gdbDirname + "/hair", "Hair", "");
+        hairBin.addListener(new FileChoicePanel.Listener() {
+            public void valueChanged(String value) {
+                Player p = (Player)playerList.getSelectedValue();
+                GDBMap.Entry e = hairMap.get(p.id);
+                if (e != null) {
+                    e.values[0] = value;
+                }
+                else {
+                    String[] values = { value };
+                    hairMap.put(p.id, new GDBMap.Entry(values, "# "+p.name));
+                }
+            }
+        });
+
+        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", "");
+        bootsFile.addListener(new FileChoicePanel.Listener() {
+            public void valueChanged(String value) {
+                Player p = (Player)playerList.getSelectedValue();
+                GDBMap.Entry e = bootsMap.get(p.id);
+                if (e != null) {
+                    e.values[0] = value;
+                }
+                else {
+                    String[] values = { value };
+                    bootsMap.put(p.id, new GDBMap.Entry(values, "# "+p.name));
+                }
+            }
+        });
+
         playerPanel.add(playerId);
         playerPanel.add(playerName);
         playerPanel.add(playerShirtName);
         playerPanel.add(new JLabel("Player teams: "));
         playerPanel.add(playerTeams);
+        playerPanel.add(faceBin);
+        playerPanel.add(hairBin);
+        playerPanel.add(bootsFile);
         add(playerPanel);
     }
 }
