@@ -12,7 +12,7 @@ import java.io.FileInputStream;
 
 public class GDBMap
 {
-    class Entry {
+    static class Entry {
         String[] values;
         String comment;
 
@@ -77,6 +77,22 @@ public class GDBMap
         for (Map.Entry<Integer,Entry> e : map.entrySet()) {
             System.out.println(e.getKey() + "," + e.getValue());
         }
+    }
+
+    public String getFirst(int id) {
+        Entry e = map.get(id);
+        if (e != null) {
+            return e.values[0];
+        }
+        return null;
+    }
+
+    public Entry get(int id) {
+        return map.get(id);
+    }
+
+    public void put(int id, Entry e) {
+        map.put(id, e);
     }
 
     public static void main(String args[]) throws Exception {
