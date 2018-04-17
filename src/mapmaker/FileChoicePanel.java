@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.ArrayList;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class FileChoicePanel extends JPanel {
 
@@ -24,7 +25,7 @@ public class FileChoicePanel extends JPanel {
         public void valueChanged(String value);
     }
 
-    public FileChoicePanel(String baseDir, String buttonText, String choiceText) {
+    public FileChoicePanel(String baseDir, String buttonText, String choiceText, String filterDesc, String ext) {
         super();
         this.baseDir = baseDir;
         listeners = new ArrayList<Listener>();
@@ -39,6 +40,7 @@ public class FileChoicePanel extends JPanel {
                 System.out.println(f.getParent());
                 JFileChooser jfc = new JFileChooser(f.getParent());
                 jfc.setDialogTitle("Choose file");
+                jfc.setFileFilter(new FileNameExtensionFilter(filterDesc, ext));
                 int returnValue = jfc.showOpenDialog(null);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = jfc.getSelectedFile();

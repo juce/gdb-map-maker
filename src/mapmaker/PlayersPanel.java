@@ -254,7 +254,7 @@ public class PlayersPanel extends JPanel
         playerTeams = new JPanel();
         playerTeams.setLayout(new BoxLayout(playerTeams, BoxLayout.Y_AXIS));
 
-        faceBin = new FileChoicePanel(this.gdbDirname + "/faces", "Face", "");
+        faceBin = new FileChoicePanel(this.gdbDirname + "/faces", "Face", "", "BIN files", "bin");
         faceBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
@@ -269,7 +269,7 @@ public class PlayersPanel extends JPanel
             }
         });
 
-        hairBin = new FileChoicePanel(this.gdbDirname + "/hair", "Hair", "");
+        hairBin = new FileChoicePanel(this.gdbDirname + "/hair", "Hair", "", "BIN files", "bin");
         hairBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
@@ -284,7 +284,7 @@ public class PlayersPanel extends JPanel
             }
         });
 
-        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", "");
+        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", "", "PNG files", "png");
         bootsFile.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
