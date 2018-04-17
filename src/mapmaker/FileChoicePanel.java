@@ -5,6 +5,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
+import javax.swing.ImageIcon;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -20,6 +21,7 @@ public class FileChoicePanel extends JPanel {
     JButton xbutt;
     JButton button;
     JLabel text;
+    JLabel image;
     List<Listener> listeners;
 
     public interface Listener {
@@ -37,6 +39,9 @@ public class FileChoicePanel extends JPanel {
         xbutt.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 text.setText("None");
+                if (image != null) {
+                    remove(image);
+                }
                 for (Listener li: listeners) {
                     li.valueChanged(null);
                 }
@@ -60,6 +65,15 @@ public class FileChoicePanel extends JPanel {
                     System.out.println(newFullPath);
                     String newValue = "\"" + getRelPath(baseDir, newFullPath) + "\"";
                     text.setText(newValue);
+
+                    if (image != null) {
+                        remove(image);
+                    }
+                    if (newFullPath.endsWith(".png")) {
+                        ImageIcon localImage = new ImageIcon(newFullPath);
+                        image = new JLabel(localImage);
+                        add(image);
+                    }
 
                     // notify listeners
                     for (Listener li : listeners) {
@@ -88,11 +102,24 @@ public class FileChoicePanel extends JPanel {
     public void setChoice(String choiceText) {
         text.setText(choiceText);
         button.setEnabled(true);
+        if (image != null) {
+            remove(image);
+        }
+        File f = new File(this.baseDir + "/" + choiceText.replace("\\","/").replace("\"",""));
+        String newFullPath = f.getAbsolutePath();
+        if (newFullPath.endsWith(".png")) {
+            ImageIcon localImage = new ImageIcon(newFullPath);
+            image = new JLabel(localImage);
+            add(image);
+        }
     }
 
     public void clear() {
         text.setText("");
         button.setEnabled(false);
+        if (image != null) {
+            remove(image);
+        }
     }
 
     public void addListener(Listener li) {
