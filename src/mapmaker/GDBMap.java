@@ -95,6 +95,10 @@ public class GDBMap
         map.put(id, e);
     }
 
+    public Entry remove(int id) {
+        return map.remove(id);
+    }
+
     public static void main(String args[]) throws Exception {
         // test
         GDBMap map = new GDBMap();

@@ -17,6 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class FileChoicePanel extends JPanel {
 
     String baseDir;
+    JButton xbutt;
     JButton button;
     JLabel text;
     List<Listener> listeners;
@@ -31,6 +32,17 @@ public class FileChoicePanel extends JPanel {
         listeners = new ArrayList<Listener>();
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+
+        xbutt = new JButton("x");
+        xbutt.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                text.setText("None");
+                for (Listener li: listeners) {
+                    li.valueChanged(null);
+                }
+            }
+        });
+
         button = new JButton(buttonText);
         button.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
@@ -57,6 +69,7 @@ public class FileChoicePanel extends JPanel {
             }
         });
         text = new JLabel(choiceText);
+        add(xbutt);
         add(button);
         add(text);
         setVisible(true);

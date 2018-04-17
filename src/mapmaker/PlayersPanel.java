@@ -258,6 +258,10 @@ public class PlayersPanel extends JPanel
         faceBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
+                if (value == null) {
+                    facesMap.remove(p.id);
+                    return;
+                }
                 GDBMap.Entry e = facesMap.get(p.id);
                 if (e != null) {
                     e.values[0] = value;
@@ -273,6 +277,10 @@ public class PlayersPanel extends JPanel
         hairBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
+                if (value == null) {
+                    hairMap.remove(p.id);
+                    return;
+                }
                 GDBMap.Entry e = hairMap.get(p.id);
                 if (e != null) {
                     e.values[0] = value;
@@ -288,6 +296,10 @@ public class PlayersPanel extends JPanel
         bootsFile.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
+                if (value == null) {
+                    bootsMap.remove(p.id);
+                    return;
+                }
                 GDBMap.Entry e = bootsMap.get(p.id);
                 if (e != null) {
                     e.values[0] = value;
