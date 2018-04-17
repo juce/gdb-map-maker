@@ -58,6 +58,7 @@ class MapMakerStartup extends JFrame
 
     public MapMakerStartup() {
         super("GDB Map Maker");
+        System.out.println("MapMakerStartup constructor called");
         listeners = new ArrayList<Listener>();
         setIcon();
         loadingPane = new JPanel();
@@ -71,6 +72,7 @@ class MapMakerStartup extends JFrame
             loadingPane.add(new JLabel(localImage));
         }
         // progress bar updater
+        doneLoading = false;
         Thread t1 = new Thread(new Runnable() {
             public void run() {
                 while (!doneLoading) {
@@ -94,12 +96,13 @@ class MapMakerStartup extends JFrame
             JButton b = new JButton("Choose option file");
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
-                    JFileChooser jfc = new JFileChooser(); //FileSystemView.getFileSystemView().getDefaultDirectory());
+                    JFileChooser jfc = new JFileChooser();
                     jfc.setDialogTitle("Choose OPTION file");
                     int returnValue = jfc.showOpenDialog(null);
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
                         File selectedFile = jfc.getSelectedFile();
                         optionFilename = selectedFile.getAbsolutePath();
+                        System.out.println("Now using optionFilename: " + optionFilename);
                         loadingPane.remove(b);
                         pack();
                         if (optionFilename != null && gdbDirname != null) {
@@ -118,12 +121,14 @@ class MapMakerStartup extends JFrame
             JButton b = new JButton("Choose GDB directory");
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
-                    JFileChooser jfc = new JFileChooser(); //FileSystemView.getFileSystemView().getDefaultDirectory());
+                    JFileChooser jfc = new JFileChooser();
                     jfc.setDialogTitle("Choose GDB directory");
+                    jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
                     int returnValue = jfc.showOpenDialog(null);
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
                         File selectedFile = jfc.getSelectedFile();
                         gdbDirname = selectedFile.getAbsolutePath();
+                        System.out.println("Now using gdbDirname: " + gdbDirname);
                         loadingPane.remove(b);
                         pack();
                         if (optionFilename != null && gdbDirname != null) {
@@ -160,8 +165,9 @@ class MapMakerStartup extends JFrame
                     li.startup(optionFilename, gdbDirname);
                 }
                 log("startup done");
-                setVisible(false);
                 doneLoading = true;
+                setVisible(false);
+                dispose();
             }
         });
         t.start();
@@ -256,6 +262,17 @@ public class MapMaker extends JFrame
                 System.exit(0);
             }
         });
+        JMenuItem chooseItem = new JMenuItem("Choose option and GDB");
+        chooseItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent event) {
+                File f = new File(MapMakerStartup.INI_FILE);
+                f.delete();
+                newUI();
+                setVisible(false);
+                dispose();
+            }
+        });
+        menu.add(chooseItem);
         menu.add(exitItem);
         mb.add(menu);
         setJMenuBar(mb);
@@ -268,8 +285,9 @@ public class MapMaker extends JFrame
             setIconImage(localImageIcon.getImage());
         }
     }
-          
-    public static void main(String args[]) {
+
+    public static void newUI() {
+        System.out.println("creating new UI");
         new MapMakerStartup().onStartup(new MapMakerStartup.Listener() {
             public void startup(String optionFilename, String gdbDirname) {
                 try {
@@ -281,5 +299,9 @@ public class MapMaker extends JFrame
                 }
             }
         });
+    }
+
+    public static void main(String args[]) {
+        newUI();
     }
 }
