@@ -74,6 +74,11 @@ public class FileChoicePanel extends JPanel {
                         image = new JLabel(localImage);
                         add(image);
                     }
+                    else if (newFullPath.endsWith(".bin")) {
+                        ImageIcon localImage = new ImageIcon(BinReader.getFirstTexture(newFullPath));
+                        image = new JLabel(localImage);
+                        add(image);
+                    }
 
                     // notify listeners
                     for (Listener li : listeners) {
@@ -109,6 +114,11 @@ public class FileChoicePanel extends JPanel {
         String newFullPath = f.getAbsolutePath();
         if (newFullPath.endsWith(".png")) {
             ImageIcon localImage = new ImageIcon(newFullPath);
+            image = new JLabel(localImage);
+            add(image);
+        }
+        else if (newFullPath.endsWith(".bin")) {
+            ImageIcon localImage = new ImageIcon(BinReader.getFirstTexture(newFullPath));
             image = new JLabel(localImage);
             add(image);
         }
