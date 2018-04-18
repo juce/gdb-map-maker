@@ -291,7 +291,7 @@ public class MapMaker extends JFrame
                 dispose();
             }
         });
-        JMenuItem saveItem = new JMenuItem("Save maps");
+        JMenuItem saveItem = new JMenuItem("Save all maps");
         saveItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
                 // faces
