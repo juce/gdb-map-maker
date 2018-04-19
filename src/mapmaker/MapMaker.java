@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import java.util.List;
 import java.util.ArrayList;
@@ -67,15 +68,17 @@ class MapMakerStartup extends JFrame
         listeners = new ArrayList<Listener>();
         setIcon();
         loadingPane = new JPanel();
-        loadingPane.setLayout(new BoxLayout(loadingPane, BoxLayout.Y_AXIS));
+        loadingPane.setLayout(new BoxLayout(loadingPane, BoxLayout.PAGE_AXIS));
         waitText = new JLabel("Loading, please wait ...");
+        waitText.setAlignmentX(Component.CENTER_ALIGNMENT);
         pb = new JProgressBar();
+        pb.setAlignmentX(Component.CENTER_ALIGNMENT);
         pb.setValue(0);
         URL localURL = getClass().getResource("data/icon-large.png");
         if (localURL != null) {
             ImageIcon localImage = new ImageIcon(localURL);
             JLabel lab = new JLabel(localImage);
-            //lab.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            lab.setAlignmentX(Component.CENTER_ALIGNMENT);
             loadingPane.add(lab);
         }
         // progress bar updater
@@ -102,6 +105,7 @@ class MapMakerStartup extends JFrame
             noButtons = false;
 
             JButton b = new JButton("Choose option file");
+            b.setAlignmentX(Component.CENTER_ALIGNMENT);
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
                     JFileChooser jfc;
@@ -136,6 +140,7 @@ class MapMakerStartup extends JFrame
             noButtons = false;
 
             JButton b = new JButton("Choose GDB directory");
+            b.setAlignmentX(Component.CENTER_ALIGNMENT);
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
                     JFileChooser jfc;
@@ -163,12 +168,20 @@ class MapMakerStartup extends JFrame
                 }
             });
             loadingPane.add(b);
+            loadingPane.add(Box.createVerticalStrut(8));
         }
 
         loadingPane.add(waitText);
         loadingPane.add(pb);
-        getContentPane().add(loadingPane);
+
+        Container pane = getContentPane();
+        pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
+        pane.add(Box.createHorizontalStrut(8));
+        pane.add(loadingPane);
+        pane.add(Box.createHorizontalStrut(8));
+
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
         doneLoading = false;
 
@@ -276,6 +289,7 @@ public class MapMaker extends JFrame
  
         getContentPane().add(tabbedPane);
         pack();
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
