@@ -3,6 +3,7 @@ package mapmaker;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -61,6 +62,7 @@ class MapMakerStartup extends JFrame
 
     public MapMakerStartup(boolean chooseNew) {
         super("GDB Map Maker");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         System.out.println("MapMakerStartup constructor called");
         listeners = new ArrayList<Listener>();
         setIcon();
@@ -72,7 +74,9 @@ class MapMakerStartup extends JFrame
         URL localURL = getClass().getResource("data/icon-large.png");
         if (localURL != null) {
             ImageIcon localImage = new ImageIcon(localURL);
-            loadingPane.add(new JLabel(localImage));
+            JLabel lab = new JLabel(localImage);
+            //lab.setAlignmentX(Component.RIGHT_ALIGNMENT);
+            loadingPane.add(lab);
         }
         // progress bar updater
         doneLoading = false;
@@ -257,6 +261,7 @@ public class MapMaker extends JFrame
 
     public MapMaker(String optionFilename, String gdbDirname) {
         super("GDB Map Maker");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setIcon();
         buildMenu();
 
