@@ -58,6 +58,7 @@ public class FileChoicePanel extends JPanel {
                 text.setText("None");
                 if (images != null) {
                     panel.remove(images);
+                    images = null;
                 }
                 for (Listener li: listeners) {
                     li.valueChanged(null);
@@ -126,10 +127,15 @@ public class FileChoicePanel extends JPanel {
 
     public void setChoice(String choiceText) {
         clear();
-        text.setText(choiceText);
-        text.setForeground(Color.black);
-        button.setEnabled(true);
-        setImages(choiceText);
+        if (choiceText != null) {
+            text.setText(choiceText);
+            text.setForeground(Color.black);
+            button.setEnabled(true);
+            setImages(choiceText);
+        }
+        else {
+            text.setText("None");
+        }
     }
 
     private void setImages(String choiceText) {
@@ -191,6 +197,7 @@ public class FileChoicePanel extends JPanel {
         button.setEnabled(false);
         if (images != null) {
             panel.remove(images);
+            images = null;
         }
     }
 

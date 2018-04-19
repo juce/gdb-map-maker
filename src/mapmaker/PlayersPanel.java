@@ -189,11 +189,8 @@ public class PlayersPanel extends JPanel
                         info.update(p);
 
                         String face = facesMap.getFirst(p.id);
-                        face = (face == null) ? "None" : face;
                         String hair = hairMap.getFirst(p.id);
-                        hair = (hair == null) ? "None" : hair;
                         String boots = bootsMap.getFirst(p.id);
-                        boots = (boots == null) ? "None" : boots;
 
                         faceBin.setChoice(face);
                         hairBin.setChoice(hair);
