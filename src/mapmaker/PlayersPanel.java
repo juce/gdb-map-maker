@@ -16,6 +16,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -61,11 +62,7 @@ public class PlayersPanel extends JPanel
     JComboBox nationalitySelector;
     JList playerList;
 
-    JLabel playerId;
-    JLabel playerName;
-    JLabel playerShirtName;
-    JPanel playerTeams;
-
+    PlayerInfoPanel info;
     FileChoicePanel faceBin;
     FileChoicePanel hairBin;
     FileChoicePanel bootsFile;
@@ -130,8 +127,7 @@ public class PlayersPanel extends JPanel
         super();
 
         filtersPanel = new JPanel();
-        filtersPanel.setLayout(new BoxLayout(filtersPanel,BoxLayout.Y_AXIS));
-        JPanel searchPanel = new JPanel();
+        filtersPanel.setLayout(new BoxLayout(filtersPanel,BoxLayout.PAGE_AXIS));
         nameSearchText = new JTextField("", 15);
         nameSearchText.getDocument().addDocumentListener(new DocumentListener() {
             public void changedUpdate(DocumentEvent e) {
@@ -147,8 +143,8 @@ public class PlayersPanel extends JPanel
                 updatePlayerList();
             }
         });
-        searchPanel.add(new JLabel("Search"));
-        searchPanel.add(nameSearchText);
+        filtersPanel.add(new JLabel("Search"));
+        filtersPanel.add(nameSearchText);
 
         teamSelectorModel = new DefaultComboBoxModel<Team>();
         teamSelector = new JComboBox(teamSelectorModel);
@@ -167,16 +163,12 @@ public class PlayersPanel extends JPanel
         nationalitySelector = new JComboBox(nationalitySelectorModel);
         nationalitySelector.addItem("<Any nationality>");
         nationalitySelector.setEnabled(false);
-
-        filtersPanel.add(searchPanel);
         filtersPanel.add(teamSelector);
-        //filtersPanel.add(nationalitySelector);
 
-        setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+        setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+        filtersPanel.setAlignmentY(Component.TOP_ALIGNMENT);
         add(filtersPanel);
 
-        //playerListModel = new DefaultListModel<Player>();
-        //playerList = new JList(playerListModel);
         playerList = new JList();
         playerList.setVisibleRowCount(32);
         playerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -186,10 +178,7 @@ public class PlayersPanel extends JPanel
                 {
                     if (playerList.isSelectionEmpty())
                     {
-                        playerId.setText("Player id: ");
-                        playerName.setText("Player name: ");
-                        playerShirtName.setText("Player shirt name: ");
-                        playerTeams.removeAll();
+                        info.clear();
                         faceBin.clear();
                         hairBin.clear();
                         bootsFile.clear();
@@ -197,13 +186,7 @@ public class PlayersPanel extends JPanel
                     else
                     {
                         Player p = (Player)playerList.getSelectedValue();
-                        playerId.setText("Player id: " + p.id);
-                        playerName.setText("Player name: " + p.name);
-                        playerShirtName.setText("Player shirt name: " + p.shirtName);
-                        playerTeams.removeAll();
-                        for (Team team : p.teams) {
-                            playerTeams.add(new JLabel(team.toString()));
-                        }
+                        info.update(p);
 
                         String face = facesMap.getFirst(p.id);
                         face = (face == null) ? "None" : face;
@@ -219,7 +202,9 @@ public class PlayersPanel extends JPanel
                 }
             }
         });
-        filtersPanel.add(new JScrollPane(playerList));
+        JScrollPane jsp = new JScrollPane(playerList);
+        jsp.setPreferredSize(new Dimension(0, 750));
+        filtersPanel.add(jsp);
 
         // load option file
         System.out.println(""+(new Date())+": loading option file");
@@ -248,13 +233,12 @@ public class PlayersPanel extends JPanel
 
         playerPanel = new JPanel();
         playerPanel.setLayout(new BoxLayout(playerPanel, BoxLayout.Y_AXIS));
-        playerId = new JLabel("Player id: ");
-        playerName = new JLabel("Player name: ");
-        playerShirtName = new JLabel("Player shirt name: ");
-        playerTeams = new JPanel();
-        playerTeams.setLayout(new BoxLayout(playerTeams, BoxLayout.Y_AXIS));
 
-        faceBin = new FileChoicePanel(this.gdbDirname + "/faces", "Face", "", "BIN files", "bin");
+        info = new PlayerInfoPanel();
+        info.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        faceBin = new FileChoicePanel(this.gdbDirname + "/faces", "Face", true, 64, 128, "", "BIN files", "bin");
+        faceBin.setAlignmentX(Component.LEFT_ALIGNMENT);
         faceBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
@@ -273,7 +257,8 @@ public class PlayersPanel extends JPanel
             }
         });
 
-        hairBin = new FileChoicePanel(this.gdbDirname + "/hair", "Hair", "", "BIN files", "bin");
+        hairBin = new FileChoicePanel(this.gdbDirname + "/hair", "Hair", true, 128, 64, "", "BIN files", "bin");
+        hairBin.setAlignmentX(Component.LEFT_ALIGNMENT);
         hairBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
@@ -292,7 +277,8 @@ public class PlayersPanel extends JPanel
             }
         });
 
-        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", "", "PNG files", "png");
+        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", false, 128, 256, "", "PNG files", "png");
+        bootsFile.setAlignmentX(Component.LEFT_ALIGNMENT);
         bootsFile.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
                 Player p = (Player)playerList.getSelectedValue();
@@ -311,14 +297,12 @@ public class PlayersPanel extends JPanel
             }
         });
 
-        playerPanel.add(playerId);
-        playerPanel.add(playerName);
-        playerPanel.add(playerShirtName);
-        playerPanel.add(new JLabel("Player teams: "));
-        playerPanel.add(playerTeams);
+        playerPanel.add(info);
         playerPanel.add(faceBin);
         playerPanel.add(hairBin);
         playerPanel.add(bootsFile);
+        playerPanel.setAlignmentY(Component.TOP_ALIGNMENT);
+        playerPanel.setPreferredSize(new Dimension(550,0));
         add(playerPanel);
     }
 }

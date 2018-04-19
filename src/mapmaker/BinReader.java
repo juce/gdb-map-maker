@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.zip.Inflater;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.io.IOException;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
@@ -35,6 +36,9 @@ public class BinReader
     public static BufferedImage getFirstTexture(String filename) {
         try {
             return _getFirstTexture(filename);
+        }
+        catch (IOException ioe) {
+            System.out.println("Warning: " + ioe);
         }
         catch (Exception e) {
             System.out.println("Warning: unable to get texture from BIN: " + filename);
