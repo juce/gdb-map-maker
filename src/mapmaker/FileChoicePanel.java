@@ -106,7 +106,8 @@ public class FileChoicePanel extends JPanel {
                                             return bi.getScaledInstance(imageWidth, imageHeight, Image.SCALE_SMOOTH);
                                         }
                                         else {
-                                            img.setText(" No preview");
+                                            img.setIcon(null);
+                                            img.setText("");
                                         }
                                     }
                                     else {
@@ -120,7 +121,8 @@ public class FileChoicePanel extends JPanel {
                                             // If there is a problem reading image,
                                             // it might not be a valid image or unable
                                             // to read
-                                            img.setText(" No preview");
+                                            img.setIcon(null);
+                                            img.setText("");
                                         }
                                     }
                                 }
@@ -133,7 +135,8 @@ public class FileChoicePanel extends JPanel {
                                     img.setIcon(new ImageIcon(i));
                                 }
                                 catch(Exception e) {
-                                    img.setText(" Preview error");
+                                    img.setIcon(null);
+                                    img.setText("");
                                 }
                             }
                         };
