@@ -239,7 +239,7 @@ public class MapMaker extends JFrame
     public static String VERSION = "0.2";
 
     public MapMaker(Settings settings) {
-        super("GDB Map Maker");
+        super("GDB Map Maker " + VERSION);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.settings = settings;
         setIcon();
@@ -266,12 +266,17 @@ public class MapMaker extends JFrame
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
-                int dialogButton = JOptionPane.YES_NO_CANCEL_OPTION;
-                int dialogResult = JOptionPane.showConfirmDialog(null, "Save your changes?", "Warning", dialogButton);
-                if (dialogResult != JOptionPane.CANCEL_OPTION) {
-                    if (dialogResult == JOptionPane.YES_OPTION) {
-                        saveAllMaps();
+                if (playersPanel.needsSave) {
+                    int dialogButton = JOptionPane.YES_NO_CANCEL_OPTION;
+                    int dialogResult = JOptionPane.showConfirmDialog(null, "Save your changes?", "Warning", dialogButton);
+                    if (dialogResult != JOptionPane.CANCEL_OPTION) {
+                        if (dialogResult == JOptionPane.YES_OPTION) {
+                            saveAllMaps();
+                        }
+                        System.exit(0);
                     }
+                }
+                else {
                     System.exit(0);
                 }
             }
@@ -304,6 +309,9 @@ public class MapMaker extends JFrame
         saveMap(settings.gdbDirname + "/hair/map.txt", playersPanel.hairMap, playersPanel.data);
         // boots
         saveMap(settings.gdbDirname + "/boots/map.txt", playersPanel.bootsMap, playersPanel.data);
+
+        // mark as saved
+        playersPanel.needsSave = false;
     }
 
     public void saveMap(String filename, GDBMap map, Data data) {
