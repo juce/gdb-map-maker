@@ -223,22 +223,21 @@ class MapMakerStartup extends JFrame
 
     public Settings loadSettings() {
         Settings settings = new Settings();
+        settings.mapOutputEncoding = DEFAULT_OUTPUT_ENCODING;
         try {
+            String line;
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(INI_FILE), "utf-8"));
-            settings.optionFilename = br.readLine();
-            if (settings.optionFilename != null) {
-                settings.optionFilename = settings.optionFilename.trim();
+            line = br.readLine();
+            if (line != null) {
+                settings.optionFilename = line.trim();
             }
-            settings.gdbDirname = br.readLine();
-            if (settings.gdbDirname != null) {
-                settings.gdbDirname = settings.gdbDirname.trim();
+            line = br.readLine();
+            if (line != null) {
+                settings.gdbDirname = line.trim();
             }
-            settings.mapOutputEncoding = br.readLine();
-            if (settings.mapOutputEncoding != null) {
-                settings.mapOutputEncoding = settings.mapOutputEncoding.trim();
-            }
-            else {
-                settings.mapOutputEncoding = DEFAULT_OUTPUT_ENCODING;
+            line = br.readLine();
+            if (line != null) {
+                settings.mapOutputEncoding = line.trim();
             }
             br.close();
         }
