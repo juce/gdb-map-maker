@@ -43,6 +43,12 @@ import java.util.Map;
 import java.util.HashMap;
 
 
+class Settings {
+    String optionFilename;
+    String gdbDirname;
+    String mapOutputEncoding;
+}
+
 class MapMakerStartup extends JFrame
 {
     JLabel waitText;
@@ -56,9 +62,10 @@ class MapMakerStartup extends JFrame
     int bCount;
 
     public static final String INI_FILE = "mapmaker.ini";
+    public static final String DEFAULT_OUTPUT_ENCODING = "iso-8859-1";
 
     public interface Listener {
-        public void startup(String optionFilename, String gdbDirname);
+        public void startup(Settings settings);
     }
 
     public MapMakerStartup(boolean chooseNew) {
@@ -97,11 +104,11 @@ class MapMakerStartup extends JFrame
         t1.start();
 
         // load file locations
-        loadFileNames();
+        Settings settings = loadSettings();
         boolean noButtons = true;
         bCount = 0;
 
-        if (optionFilename == null || chooseNew) {
+        if (settings.optionFilename == null || chooseNew) {
             waitText.setVisible(false);
             pb.setVisible(false);
             noButtons = false;
@@ -113,7 +120,7 @@ class MapMakerStartup extends JFrame
                     JFileChooser jfc;
                     if (optionFilename != null) {
                         // look in the same directory where last time
-                        File f = new File(optionFilename);
+                        File f = new File(settings.optionFilename);
                         jfc = new JFileChooser(f.getParent());
                     }
                     else {
@@ -123,20 +130,20 @@ class MapMakerStartup extends JFrame
                     int returnValue = jfc.showOpenDialog(null);
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
                         File selectedFile = jfc.getSelectedFile();
-                        optionFilename = selectedFile.getAbsolutePath();
-                        System.out.println("Now using optionFilename: " + optionFilename);
+                        settings.optionFilename = selectedFile.getAbsolutePath();
+                        System.out.println("Now using optionFilename: " + settings.optionFilename);
                         loadingPane.remove(b);
                         pack();
                         bCount |= 1;
                         if (bCount == 3) {
-                            triggerStartup();
+                            triggerStartup(settings);
                         }
                     }
                 }
             });
             loadingPane.add(b);
         }
-        if (gdbDirname == null || chooseNew) {
+        if (settings.gdbDirname == null || chooseNew) {
             waitText.setVisible(false);
             pb.setVisible(false);
             noButtons = false;
@@ -158,13 +165,13 @@ class MapMakerStartup extends JFrame
                     int returnValue = jfc.showOpenDialog(null);
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
                         File selectedFile = jfc.getSelectedFile();
-                        gdbDirname = selectedFile.getAbsolutePath();
-                        System.out.println("Now using gdbDirname: " + gdbDirname);
+                        settings.gdbDirname = selectedFile.getAbsolutePath();
+                        System.out.println("Now using gdbDirname: " + settings.gdbDirname);
                         loadingPane.remove(b);
                         pack();
                         bCount |= 2;
                         if (bCount == 3) {
-                            triggerStartup();
+                            triggerStartup(settings);
                         }
                     }
                 }
@@ -188,11 +195,11 @@ class MapMakerStartup extends JFrame
         doneLoading = false;
 
         if (noButtons) {
-            triggerStartup();
+            triggerStartup(settings);
         }
     }
 
-    public void triggerStartup() {
+    public void triggerStartup(Settings settings) {
         // kick-off initialization
         waitText.setVisible(true);
         pb.setVisible(true);
@@ -202,7 +209,7 @@ class MapMakerStartup extends JFrame
             public void run() {
                 log("starting");
                 for (Listener li : listeners) {
-                    li.startup(optionFilename, gdbDirname);
+                    li.startup(settings);
                 }
                 log("startup done");
                 doneLoading = true;
@@ -211,19 +218,27 @@ class MapMakerStartup extends JFrame
             }
         });
         t.start();
-        saveFileNames();
+        saveSettings(settings);
     }
 
-    public void loadFileNames() {
+    public Settings loadSettings() {
+        Settings settings = new Settings();
         try {
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(INI_FILE), "utf-8"));
-            optionFilename = br.readLine();
-            if (optionFilename != null) {
-                optionFilename = optionFilename.trim();
+            settings.optionFilename = br.readLine();
+            if (settings.optionFilename != null) {
+                settings.optionFilename = settings.optionFilename.trim();
             }
-            gdbDirname = br.readLine();
-            if (gdbDirname != null) {
-                gdbDirname = gdbDirname.trim();
+            settings.gdbDirname = br.readLine();
+            if (settings.gdbDirname != null) {
+                settings.gdbDirname = settings.gdbDirname.trim();
+            }
+            settings.mapOutputEncoding = br.readLine();
+            if (settings.mapOutputEncoding != null) {
+                settings.mapOutputEncoding = settings.mapOutputEncoding.trim();
+            }
+            else {
+                settings.mapOutputEncoding = DEFAULT_OUTPUT_ENCODING;
             }
             br.close();
         }
@@ -233,15 +248,18 @@ class MapMakerStartup extends JFrame
         catch (IOException e2) {
             System.out.println("Problem: " + e2);
         }
-        System.out.println("Using optionFilename: " + optionFilename);
-        System.out.println("Using gdbDirname: " + gdbDirname);
+        System.out.println("Using optionFilename: " + settings.optionFilename);
+        System.out.println("Using gdbDirname: " + settings.gdbDirname);
+        System.out.println("Using mapOutputEncoding: " + settings.mapOutputEncoding);
+        return settings;
     }
 
-    public void saveFileNames() {
+    public void saveSettings(Settings settings) {
         try {
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(INI_FILE), "utf-8"));
-            bw.write(optionFilename + "\r\n");
-            bw.write(gdbDirname + "\r\n");
+            bw.write(settings.optionFilename + "\r\n");
+            bw.write(settings.gdbDirname + "\r\n");
+            bw.write(settings.mapOutputEncoding + "\r\n");
             bw.close();
         }
         catch (IOException e1) {
@@ -273,14 +291,16 @@ public class MapMaker extends JFrame
     PlayersPanel playersPanel;
     StadiumsPanel stadiumsPanel;
     BallsPanel ballsPanel;
+    Settings settings;
 
-    public MapMaker(String optionFilename, String gdbDirname) {
+    public MapMaker(Settings settings) {
         super("GDB Map Maker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.settings = settings;
         setIcon();
         buildMenu();
 
-        playersPanel = new PlayersPanel(optionFilename, gdbDirname);
+        playersPanel = new PlayersPanel(settings.optionFilename, settings.gdbDirname);
         stadiumsPanel = new StadiumsPanel();
         ballsPanel = new BallsPanel();
 
@@ -334,16 +354,16 @@ public class MapMaker extends JFrame
 
     private void saveAllMaps() {
         // faces
-        saveMap(playersPanel.gdbDirname + "/faces/map.txt", playersPanel.facesMap, playersPanel.data);
+        saveMap(settings.gdbDirname + "/faces/map.txt", playersPanel.facesMap, playersPanel.data);
         // hair
-        saveMap(playersPanel.gdbDirname + "/hair/map.txt", playersPanel.hairMap, playersPanel.data);
+        saveMap(settings.gdbDirname + "/hair/map.txt", playersPanel.hairMap, playersPanel.data);
         // boots
-        saveMap(playersPanel.gdbDirname + "/boots/map.txt", playersPanel.bootsMap, playersPanel.data);
+        saveMap(settings.gdbDirname + "/boots/map.txt", playersPanel.bootsMap, playersPanel.data);
     }
 
     public void saveMap(String filename, GDBMap map, Data data) {
         try {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), "utf-8"));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filename), settings.mapOutputEncoding));
             bw.write("# Map generated by GDB Map Maker\r\n");
             for (Map.Entry<Integer,Squad> e : data.squads.entrySet()) {
                 int teamId = e.getKey().intValue();
@@ -402,9 +422,9 @@ public class MapMaker extends JFrame
     public static void newUI(boolean chooseNew) {
         System.out.println("creating new UI");
         new MapMakerStartup(chooseNew).onStartup(new MapMakerStartup.Listener() {
-            public void startup(String optionFilename, String gdbDirname) {
+            public void startup(Settings settings) {
                 try {
-                    new MapMaker(optionFilename, gdbDirname);
+                    new MapMaker(settings);
                 }
                 catch (Exception e) {
                     System.out.println("FATAL problem: " + e);

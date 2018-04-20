@@ -9,6 +9,7 @@ import java.util.regex.Matcher;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.FileInputStream;
+import java.nio.charset.Charset;
 
 public class GDBMap
 {
@@ -32,12 +33,20 @@ public class GDBMap
 
     Map<Integer,Entry> map;
 
+    public static String[] encodings = { "utf-8", "utf-16", "iso-8859-1", "windows-1251", "windows-1252", "windows-1253", "iso-8859-7" };
+
     public GDBMap() {
         map = new HashMap<Integer,Entry>();
     }
 
     public void load(String filename) throws Exception {
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), "iso8859-1"));
+        Charset charset = new CharsetDetector().detect(filename, encodings);
+        if (charset == null) {
+            throw new Exception("Unknown charset for map: " + filename);
+        }
+        System.out.println("Detected " + charset + " encoding for map: " + filename);
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(filename), charset.toString()));
         String line = null;
         Pattern pattern = Pattern.compile("^\\s*([0-9]+)\\s*,\\s*(\"[^\"]*\"|[^,#]*)(\\s*,[^#]*)?\\s*(#.*)?$");
         Pattern pattern2 = Pattern.compile("\\s*,\\s*(\"[^\"]*\"|[^,]*)");
