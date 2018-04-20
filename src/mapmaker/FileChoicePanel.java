@@ -8,6 +8,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
 import javax.swing.ImageIcon;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.event.ActionListener;
@@ -16,11 +17,16 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+import javax.imageio.ImageIO;
 
 public class FileChoicePanel extends JPanel {
 
@@ -73,9 +79,68 @@ public class FileChoicePanel extends JPanel {
                 File f = new File(baseDir + "/" + relPath);
                 System.out.println(f);
                 System.out.println(f.getParent());
+
                 JFileChooser jfc = new JFileChooser(f.getParent());
                 jfc.setDialogTitle("Choose file");
                 jfc.setFileFilter(new FileNameExtensionFilter(filterDesc, ext));
+
+                // Create label
+                JLabel img=new JLabel();
+                img.setPreferredSize(new Dimension(imageWidth,imageHeight));
+                jfc.setAccessory(img);
+                jfc.setAcceptAllFileFilterUsed(false);
+
+                // Add property change listener
+                jfc.addPropertyChangeListener(new PropertyChangeListener() {
+                    public void propertyChange(final PropertyChangeEvent pe) {
+                        SwingWorker<Image,Void> worker=new SwingWorker<Image,Void>(){
+                            // The image processing method
+                            protected Image doInBackground() {
+                                // If selected file changes..
+                                if(pe.getPropertyName().equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)) {
+                                    File f=jfc.getSelectedFile();
+                                    String path = f.getAbsolutePath();
+                                    if (path.endsWith(".bin")) {
+                                        BufferedImage bi = BinReader.getFirstTexture(f.getAbsolutePath());
+                                        if (bi != null) {
+                                            return bi.getScaledInstance(imageWidth, imageHeight, Image.SCALE_SMOOTH);
+                                        }
+                                        else {
+                                            img.setText(" No preview");
+                                        }
+                                    }
+                                    else {
+                                        try {
+                                            // Expecting an image
+                                            FileInputStream fin=new FileInputStream(f);
+                                            BufferedImage bi=ImageIO.read(fin);
+                                            return bi.getScaledInstance(imageWidth, imageHeight, Image.SCALE_SMOOTH);
+                                        }
+                                        catch(Exception e){
+                                            // If there is a problem reading image,
+                                            // it might not be a valid image or unable
+                                            // to read
+                                            img.setText(" No preview");
+                                        }
+                                    }
+                                }
+                                return null;
+                            }
+                            protected void done() {
+                                try {
+                                    Image i=get(1L, TimeUnit.NANOSECONDS);
+                                    if (i==null) return;
+                                    img.setIcon(new ImageIcon(i));
+                                }
+                                catch(Exception e) {
+                                    img.setText(" Preview error");
+                                }
+                            }
+                        };
+                        worker.execute();
+                    }
+                });
+
                 int returnValue = jfc.showOpenDialog(null);
                 if (returnValue == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = jfc.getSelectedFile();
@@ -124,10 +189,10 @@ public class FileChoicePanel extends JPanel {
 
     public void setChoice(String choiceText) {
         clear();
+        text.setForeground(Color.black);
         button.setEnabled(true);
         if (choiceText != null) {
             text.setText(choiceText);
-            text.setForeground(Color.black);
             setImages(choiceText);
         }
         else {
