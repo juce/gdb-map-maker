@@ -124,10 +124,10 @@ public class FileChoicePanel extends JPanel {
 
     public void setChoice(String choiceText) {
         clear();
+        button.setEnabled(true);
         if (choiceText != null) {
             text.setText(choiceText);
             text.setForeground(Color.black);
-            button.setEnabled(true);
             setImages(choiceText);
         }
         else {
