@@ -25,6 +25,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenu;
@@ -336,6 +337,19 @@ public class MapMaker extends JFrame
         menu1.add(systemLook);
         menu1.add(metalLook);
         mb.add(menu1);
+
+        JFrame parent = this;
+        JMenu menu2 = new JMenu("Help");
+        JMenuItem about = new JMenuItem("About");
+        about.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AboutDialog dialog = new AboutDialog(parent, VERSION);
+                dialog.show();
+            }
+        });
+        menu2.add(about);
+        mb.add(menu2);
+
         setJMenuBar(mb);
     }
 
