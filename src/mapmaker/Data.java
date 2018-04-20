@@ -235,6 +235,24 @@ public class Data
         return false;
     }
 
+    private boolean playerMatchSubstr(Player p, String namePrefix) {
+        if (namePrefix == null || namePrefix.equals("")) {
+            return true;
+        }
+        if (p.name.toUpperCase().indexOf(namePrefix.toUpperCase()) >= 0) {
+            return true;
+        }
+        String sn = p.shirtName.toUpperCase();
+        if (sn.toUpperCase().indexOf(namePrefix.toUpperCase()) >= 0) {
+            return true;
+        }
+        sn = sn.replace(" ","").trim();
+        if (sn.toUpperCase().indexOf(namePrefix.toUpperCase()) >= 0) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * get all teams
      */
@@ -276,6 +294,24 @@ public class Data
                 return 0;
             }
         });
+        if (li.size() == 0) {
+            for (Map.Entry<Integer,Player> entry : players.entrySet()) {
+                Player p = entry.getValue();
+                if (p.id != 0) {
+                    if (playerMatchSubstr(p, namePrefix)) {
+                        li.add(p);
+                    }
+                }
+            }
+            Collections.sort(li, new Comparator<Player>() {
+                @Override
+                public int compare(Player o1, Player o2) {
+                    if (o1.id < o2.id) return -1;
+                    else if (o1.id > o2.id) return 1;
+                    return 0;
+                }
+            });
+        }
         Player[] arr = new Player[li.size()];
         return li.toArray(arr);
     }
