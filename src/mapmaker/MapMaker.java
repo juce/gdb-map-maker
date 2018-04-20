@@ -36,6 +36,7 @@ import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.UIManager;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,7 +58,21 @@ class MapMakerStartup extends JFrame
         public void startup(Settings settings);
     }
 
-    public MapMakerStartup(boolean chooseNew) {
+    public static void tryTheme(String theme) {
+        try {
+            if ("native".equals(theme)) {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            }
+            else if ("metal".equals(theme)) {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            }
+        }
+        catch (Exception e) {
+            System.out.println("Unable to set theme: " + theme);
+        }
+    }
+
+    public MapMakerStartup(Settings settings, boolean chooseNew) {
         super("GDB Map Maker");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         System.out.println("MapMakerStartup constructor called");
@@ -92,8 +107,6 @@ class MapMakerStartup extends JFrame
         });
         t1.start();
 
-        // load settings
-        Settings settings = new Settings();
         boolean noButtons = true;
         bCount = 0;
 
@@ -171,6 +184,7 @@ class MapMakerStartup extends JFrame
 
         loadingPane.add(waitText);
         loadingPane.add(pb);
+        loadingPane.add(Box.createVerticalStrut(8));
 
         Container pane = getContentPane();
         pane.setLayout(new BoxLayout(pane, BoxLayout.LINE_AXIS));
@@ -236,7 +250,7 @@ public class MapMaker extends JFrame
     BallsPanel ballsPanel;
     Settings settings;
 
-    public static String VERSION = "0.2";
+    public static String VERSION = "0.3";
 
     public MapMaker(Settings settings) {
         super("GDB Map Maker " + VERSION);
@@ -299,6 +313,29 @@ public class MapMaker extends JFrame
         menu.add(saveItem);
         menu.add(exitItem);
         mb.add(menu);
+
+        JMenu menu1 = new JMenu("Tools");
+        JMenuItem systemLook = new JMenuItem("Set native theme");
+        systemLook.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                settings.theme = "native";
+                settings.save();
+                int dialogButton = JOptionPane.INFORMATION_MESSAGE;
+                JOptionPane.showMessageDialog(null, "Restart GDB Map Maker to see new theme", "Theme switched to: "+settings.theme, dialogButton);
+            }
+        });
+        JMenuItem metalLook = new JMenuItem("Set Java-metal theme");
+        metalLook.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                settings.theme = "metal";
+                settings.save();
+                int dialogButton = JOptionPane.INFORMATION_MESSAGE;
+                JOptionPane.showMessageDialog(null, "Restart GDB Map Maker to see new theme", "Theme switched to: "+settings.theme, dialogButton);
+            }
+        });
+        menu1.add(systemLook);
+        menu1.add(metalLook);
+        mb.add(menu1);
         setJMenuBar(mb);
     }
 
@@ -374,7 +411,9 @@ public class MapMaker extends JFrame
 
     public static void newUI(boolean chooseNew) {
         System.out.println("creating new UI");
-        new MapMakerStartup(chooseNew).onStartup(new MapMakerStartup.Listener() {
+        Settings settings = new Settings();
+        MapMakerStartup.tryTheme(settings.theme);
+        new MapMakerStartup(settings, chooseNew).onStartup(new MapMakerStartup.Listener() {
             public void startup(Settings settings) {
                 try {
                     new MapMaker(settings);

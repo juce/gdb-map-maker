@@ -14,6 +14,7 @@ public class Settings {
     public String optionFilename;
     public String gdbDirname;
     public String mapOutputEncoding;
+    public String theme;
 
     private String filename;
 
@@ -53,6 +54,9 @@ public class Settings {
                     else if ("map.output.encoding".equals(key)) {
                         mapOutputEncoding = value;
                     }
+                    else if ("theme".equals(key)) {
+                        theme = value;
+                    }
                 }
                 else if (line.charAt(0)!='#') {
                     // check old format
@@ -78,6 +82,7 @@ public class Settings {
         System.out.println("Using optionFilename: " + optionFilename);
         System.out.println("Using gdbDirname: " + gdbDirname);
         System.out.println("Using mapOutputEncoding: " + mapOutputEncoding);
+        System.out.println("Using theme: " + theme);
     }
 
     public void save() {
@@ -86,6 +91,7 @@ public class Settings {
             bw.write("option.file = " + optionFilename + "\r\n");
             bw.write("gdb.dir = " + gdbDirname + "\r\n");
             bw.write("map.output.encoding = " + mapOutputEncoding + "\r\n");
+            bw.write("theme = " + theme + "\r\n");
             bw.close();
         }
         catch (IOException e1) {
