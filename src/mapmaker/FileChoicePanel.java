@@ -82,10 +82,7 @@ public class FileChoicePanel extends JPanel {
                     String newFullPath = selectedFile.getAbsolutePath();
                     System.out.println(newFullPath);
                     String newValue = "\"" + getRelPath(baseDir, newFullPath) + "\"";
-                    text.setText(newValue);
-                    text.setForeground(Color.black);
-
-                    setImages(newValue);
+                    setChoice(newValue);
 
                     // notify listeners
                     for (Listener li : listeners) {

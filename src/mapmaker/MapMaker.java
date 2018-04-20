@@ -74,13 +74,15 @@ class MapMakerStartup extends JFrame
         pb = new JProgressBar();
         pb.setAlignmentX(Component.CENTER_ALIGNMENT);
         pb.setValue(0);
-        URL localURL = getClass().getResource("data/icon-large.png");
+        URL localURL = getClass().getResource("data/splash.jpg");
         if (localURL != null) {
             ImageIcon localImage = new ImageIcon(localURL);
             JLabel lab = new JLabel(localImage);
             lab.setAlignmentX(Component.CENTER_ALIGNMENT);
             loadingPane.add(lab);
         }
+        loadingPane.add(Box.createVerticalStrut(8));
+
         // progress bar updater
         doneLoading = false;
         Thread t1 = new Thread(new Runnable() {
@@ -299,7 +301,14 @@ public class MapMaker extends JFrame
         JMenuItem exitItem = new JMenuItem("Exit");
         exitItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent paramAnonymousActionEvent) {
-                System.exit(0);
+                int dialogButton = JOptionPane.YES_NO_CANCEL_OPTION;
+                int dialogResult = JOptionPane.showConfirmDialog(null, "Save your changes?", "Warning", dialogButton);
+                if (dialogResult != JOptionPane.CANCEL_OPTION) {
+                    if (dialogResult == JOptionPane.YES_OPTION) {
+                        saveAllMaps();
+                    }
+                    System.exit(0);
+                }
             }
         });
         JMenuItem chooseItem = new JMenuItem("Choose option and GDB");
@@ -313,12 +322,7 @@ public class MapMaker extends JFrame
         JMenuItem saveItem = new JMenuItem("Save all maps");
         saveItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent event) {
-                // faces
-                saveMap("map-faces.txt", playersPanel.facesMap, playersPanel.data);
-                // hair
-                saveMap("map-hair.txt", playersPanel.hairMap, playersPanel.data);
-                // boots
-                saveMap("map-boots.txt", playersPanel.bootsMap, playersPanel.data);
+                saveAllMaps();
             }
         });
         menu.add(chooseItem);
@@ -326,6 +330,15 @@ public class MapMaker extends JFrame
         menu.add(exitItem);
         mb.add(menu);
         setJMenuBar(mb);
+    }
+
+    private void saveAllMaps() {
+        // faces
+        saveMap(playersPanel.gdbDirname + "/faces/map.txt", playersPanel.facesMap, playersPanel.data);
+        // hair
+        saveMap(playersPanel.gdbDirname + "/hair/map.txt", playersPanel.hairMap, playersPanel.data);
+        // boots
+        saveMap(playersPanel.gdbDirname + "/boots/map.txt", playersPanel.bootsMap, playersPanel.data);
     }
 
     public void saveMap(String filename, GDBMap map, Data data) {
@@ -371,6 +384,7 @@ public class MapMaker extends JFrame
             bw.write("\r\n");
             bw.write("# end-of-map\r\n");
             bw.close();
+            System.out.println("SAVED: " + filename);
         }
         catch (IOException e) {
             System.out.println("Problem saving: " + filename);
