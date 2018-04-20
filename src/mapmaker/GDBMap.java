@@ -33,7 +33,7 @@ public class GDBMap
 
     Map<Integer,Entry> map;
 
-    public static String[] encodings = { "utf-8", "utf-16", "iso-8859-1", "windows-1251", "windows-1252", "windows-1253", "iso-8859-7" };
+    public static String[] encodings = { "utf-8", "iso-8859-1", "windows-1251", "windows-1252", "windows-1253", "iso-8859-7" };
 
     public GDBMap() {
         map = new HashMap<Integer,Entry>();
