@@ -274,7 +274,7 @@ public class PlayersPanel extends JPanel
             }
         });
 
-        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", false, 128, 256, "", "PNG files", "png");
+        bootsFile = new FileChoicePanel(this.gdbDirname + "/boots", "Boots", false, 170, 256, "", "PNG files", "png");
         bootsFile.setAlignmentX(Component.LEFT_ALIGNMENT);
         bootsFile.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
