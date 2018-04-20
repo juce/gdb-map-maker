@@ -74,6 +74,7 @@ public class PlayersPanel extends JPanel
     OptionFile of;
     Data data;
     String gdbDirname;
+    boolean needsSave;
 
     GDBMap facesMap;
     GDBMap hairMap;
@@ -125,6 +126,7 @@ public class PlayersPanel extends JPanel
 
     public PlayersPanel(String optionFilename, String gdbDirname) {
         super();
+        needsSave = false;
 
         filtersPanel = new JPanel();
         filtersPanel.setLayout(new BoxLayout(filtersPanel,BoxLayout.PAGE_AXIS));
@@ -238,6 +240,7 @@ public class PlayersPanel extends JPanel
         faceBin.setAlignmentX(Component.LEFT_ALIGNMENT);
         faceBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
+                needsSave = true;
                 Player p = (Player)playerList.getSelectedValue();
                 if (value == null) {
                     facesMap.remove(p.id);
@@ -258,6 +261,7 @@ public class PlayersPanel extends JPanel
         hairBin.setAlignmentX(Component.LEFT_ALIGNMENT);
         hairBin.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
+                needsSave = true;
                 Player p = (Player)playerList.getSelectedValue();
                 if (value == null) {
                     hairMap.remove(p.id);
@@ -278,6 +282,7 @@ public class PlayersPanel extends JPanel
         bootsFile.setAlignmentX(Component.LEFT_ALIGNMENT);
         bootsFile.addListener(new FileChoicePanel.Listener() {
             public void valueChanged(String value) {
+                needsSave = true;
                 Player p = (Player)playerList.getSelectedValue();
                 if (value == null) {
                     bootsMap.remove(p.id);
