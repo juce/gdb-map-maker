@@ -17,7 +17,7 @@ test:
 	javac -d dist src/mapmaker/GDBMap.java
 	java -cp dist mapmaker.GDBMap $(mapfile)
 
-version=0.1
+version=$(shell cat src/mapmaker/MapMaker.java |grep -o " VERSION =.*"|grep -o "[0-9.][0-9.]*")
 packname=GDB_MapMaker-$(version)
 zip: clean build jar
 	rm -rf $(packname) $(packname).zip

@@ -43,12 +43,6 @@ import java.util.Map;
 import java.util.HashMap;
 
 
-class Settings {
-    String optionFilename;
-    String gdbDirname;
-    String mapOutputEncoding;
-}
-
 class MapMakerStartup extends JFrame
 {
     JLabel waitText;
@@ -56,13 +50,8 @@ class MapMakerStartup extends JFrame
     JPanel loadingPane;
     List<Listener> listeners;
 
-    String optionFilename;
-    String gdbDirname;
     boolean doneLoading;
     int bCount;
-
-    public static final String INI_FILE = "mapmaker.ini";
-    public static final String DEFAULT_OUTPUT_ENCODING = "iso-8859-1";
 
     public interface Listener {
         public void startup(Settings settings);
@@ -103,8 +92,8 @@ class MapMakerStartup extends JFrame
         });
         t1.start();
 
-        // load file locations
-        Settings settings = loadSettings();
+        // load settings
+        Settings settings = new Settings();
         boolean noButtons = true;
         bCount = 0;
 
@@ -118,7 +107,7 @@ class MapMakerStartup extends JFrame
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
                     JFileChooser jfc;
-                    if (optionFilename != null) {
+                    if (settings.optionFilename != null) {
                         // look in the same directory where last time
                         File f = new File(settings.optionFilename);
                         jfc = new JFileChooser(f.getParent());
@@ -153,8 +142,8 @@ class MapMakerStartup extends JFrame
             b.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent event) {
                     JFileChooser jfc;
-                    if (gdbDirname != null) {
-                        File f = new File(gdbDirname);
+                    if (settings.gdbDirname != null) {
+                        File f = new File(settings.gdbDirname);
                         jfc = new JFileChooser(f.getParent());
                     }
                     else {
@@ -218,52 +207,7 @@ class MapMakerStartup extends JFrame
             }
         });
         t.start();
-        saveSettings(settings);
-    }
-
-    public Settings loadSettings() {
-        Settings settings = new Settings();
-        settings.mapOutputEncoding = DEFAULT_OUTPUT_ENCODING;
-        try {
-            String line;
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(INI_FILE), "utf-8"));
-            line = br.readLine();
-            if (line != null) {
-                settings.optionFilename = line.trim();
-            }
-            line = br.readLine();
-            if (line != null) {
-                settings.gdbDirname = line.trim();
-            }
-            line = br.readLine();
-            if (line != null) {
-                settings.mapOutputEncoding = line.trim();
-            }
-            br.close();
-        }
-        catch (FileNotFoundException e1) {
-            System.out.println("Warning: " + INI_FILE + " was not found");
-        }
-        catch (IOException e2) {
-            System.out.println("Problem: " + e2);
-        }
-        System.out.println("Using optionFilename: " + settings.optionFilename);
-        System.out.println("Using gdbDirname: " + settings.gdbDirname);
-        System.out.println("Using mapOutputEncoding: " + settings.mapOutputEncoding);
-        return settings;
-    }
-
-    public void saveSettings(Settings settings) {
-        try {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(INI_FILE), "utf-8"));
-            bw.write(settings.optionFilename + "\r\n");
-            bw.write(settings.gdbDirname + "\r\n");
-            bw.write(settings.mapOutputEncoding + "\r\n");
-            bw.close();
-        }
-        catch (IOException e1) {
-            System.out.println("Warning: cannot save " + INI_FILE);
-        }
+        settings.save();
     }
 
     public void log(String message) {
@@ -292,7 +236,7 @@ public class MapMaker extends JFrame
     BallsPanel ballsPanel;
     Settings settings;
 
-    public static String VERSION = "0.1";
+    public static String VERSION = "0.2";
 
     public MapMaker(Settings settings) {
         super("GDB Map Maker");
