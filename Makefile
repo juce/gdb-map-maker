@@ -16,3 +16,11 @@ mapfile=map.txt
 test:
 	javac -d dist src/mapmaker/GDBMap.java
 	java -cp dist mapmaker.GDBMap $(mapfile)
+
+version=0.1
+packname=GDB_MapMaker-$(version)
+zip: clean build jar
+	rm -rf $(packname) $(packname).zip
+	mkdir -p $(packname)
+	cp -p GDB_MapMaker.jar team-names.csv $(packname)/
+	zip -r -9 $(packname).zip $(packname)
