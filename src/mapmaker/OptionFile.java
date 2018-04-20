@@ -1,3 +1,9 @@
+/**
+ * To the best of my knowledge, this code has been written by Compulsion (http://www.purplehaze.eclipse.co.uk/),
+ * possibly with some modifications by lazanet (https://github.com/lazanet). Therefore they are credited
+ * as authors here.
+ */
+
 package mapmaker;
 
 import java.io.BufferedInputStream;
