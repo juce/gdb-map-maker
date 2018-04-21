@@ -23,7 +23,7 @@ public class AboutDialog extends JDialog {
     JButton ok;
 
     public AboutDialog(JFrame parent, String version) {
-        super(parent, "About GDB Map Maker", false);
+        super(parent, "About GDB Map Maker", true);
         JPanel pane = new JPanel();
         pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
         URL localURL = getClass().getResource("data/splash.jpg");
@@ -70,34 +70,20 @@ public class AboutDialog extends JDialog {
 
         ok = new JButton("Ok");
         ok.setAlignmentX(Component.CENTER_ALIGNMENT);
-        pane.add(ok);
-        pane.add(Box.createVerticalStrut(8));
-
         ok.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent evt) {
                 setVisible(false);
                 dispose();
             }
         });
-        addWindowListener(new WindowAdapter() {
-            public void windowGainedFocus(WindowEvent e) {
-                focusOnButton();
-            }
-        });
+        pane.add(ok);
+        pane.add(Box.createVerticalStrut(8));
 
         getContentPane().add(pane);
         pack();
-        focusOnButton();
+        SwingUtilities.getRootPane(ok).setDefaultButton(ok);
         setLocationRelativeTo(null);
         setModal(true);
-    }
-
-    public void focusOnButton() {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                ok.requestFocusInWindow();
-            }
-        });
     }
 }
 
